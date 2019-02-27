@@ -1,9 +1,11 @@
+Erinnerung: <%= $type %>
+
 Hallo zusammen,
 
-am <%= $date %> um <%= $time %> Uhr findet <%= $type %> statt.
-Verantwortlich ist: <%= $resp %>.
+am <%= $date %> um <%= $time %> Uhr findet <%= $type %> 
+für <%= $group %> statt.
 
-% if ( $topic ne '???' ) {
+Verantwortlich ist: <%= $resp %>.<% if ( $topic ne '???' ) { %>
 Thema: <%= $topic %>
 % }
 
