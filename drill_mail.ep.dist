@@ -1,0 +1,13 @@
+Hallo zusammen,
+
+am <%= $date %> um <%= $time %> Uhr findet <%= $type %> statt.
+Verantwortlich ist: <%= $resp %>.
+
+% if ( $topic ne '???' ) {
+Thema: <%= $topic %>
+% }
+
+Um zahlreiches Erscheinen wird gebeten.
+
+Mit kameradschaftlichen Grüßen,
+Wehrführung
