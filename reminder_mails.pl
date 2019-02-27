@@ -12,6 +12,7 @@ use File::Basename;
 use Mojo::Template;
 use Net::Netrc;
 use Text::CSV_XS;
+use Time::Piece;
 
 use constant LEVEL_1      => 5;
 use constant INPUT_FILE   => File::Spec->catfile( dirname(__FILE__), 'Dienstplan.csv');
@@ -26,7 +27,7 @@ exit if !$text;
 my $to = join ', ', @{ $groups{$group} || [] };
 exit if !$to;
 
-#_send_mail( $to, $text );
+_send_mail( $to, $text );
 
 exit;
 
@@ -51,7 +52,7 @@ sub _send_mail {
                   ->transport( Email::Sender::Transport::SMTP->new( {
                       host          => $host,
                       sasl_username => $login,
-                      sasl_password => $password,
+                      sasl_password => $passwd,
                   }) )
                   ->send;
 }
@@ -79,12 +80,12 @@ sub _get_drill {
 
         if ( $epoche - $today == 5 ) {
             $drill = {
-                group => $row->[4],
-                type  => $row->[5],
-                time  => $row->[2],
-                date  => $row->[1],
-                resp  => $row->[6],
-                topic => $row->[3],
+                group       => $row->[4],
+                type        => $row->[5],
+                time        => $row->[2],
+                date        => $row->[1],
+                responsible => $row->[6],
+                topic       => $row->[3],
             };
 
             last;
@@ -104,10 +105,16 @@ sub _get_group_and_mail_text {
         date  => $drill->{date},
         resp  => $drill->{responsible},
         topic => $drill->{topic},
+        time  => $drill->{time},
+        group => 'die Einsatzabteilung',
     );
 
     if ( $drill->{type} eq 'Theorie' ) {
         $vars{type} = 'der nächste Schulungsabend';
+    }
+
+    if ( $drill->{group} ne 'EA' ) {
+        $vars{group} = $drill->{group};
     }
 
     my $text = Mojo::Template->new( vars => 1 )->render_file( TEMPLATE, \%vars );
@@ -128,7 +135,7 @@ sub _get_groups {
 
         $membership //= 'EA';
 
-        push $groups{$_}, $mail for split /\s*,\s*/, $membership;
+        push @{ $groups{$_} }, $mail for split /\s*,\s*/, $membership;
     }
 
     return %groups;
